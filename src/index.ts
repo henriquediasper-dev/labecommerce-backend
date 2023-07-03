@@ -25,3 +25,4 @@ const allProducts = getAllProducts();
   
 const searchResults = searchProductsByName("gamer");
 console.log('Resultados da busca', searchResults)
+

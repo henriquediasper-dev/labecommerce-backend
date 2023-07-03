@@ -1,6 +1,11 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.searchProductsByName = exports.getAllProducts = exports.createProduct = exports.getAllUsers = exports.createTUser = exports.products = exports.users = void 0;
+const express_1 = __importDefault(require("express"));
+const cors_1 = __importDefault(require("cors"));
 exports.users = [
     {
         id: 'u001',
@@ -43,7 +48,7 @@ function createTUser(id, name, email, password) {
         createdAt,
     };
     exports.users.push(newTUser);
-    return "Produto criado com sucesso";
+    return "Cadastro realizado com sucesso";
 }
 exports.createTUser = createTUser;
 function getAllUsers() {
@@ -72,4 +77,13 @@ function searchProductsByName(name) {
     return searchResults;
 }
 exports.searchProductsByName = searchProductsByName;
+const app = (0, express_1.default)();
+app.use(express_1.default.json());
+app.use((0, cors_1.default)());
+app.listen(3003, () => {
+    console.log("Servidor rodando na porta 3003");
+});
+app.get("/ping", (req, res) => {
+    res.send("Pong!");
+});
 //# sourceMappingURL=database.js.map
