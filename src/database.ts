@@ -35,7 +35,7 @@ export const products: TProduct[] = [
     name: 'Monitor',
     price: 900,
     description: 'Monitor LED Full HD 24 polegadas',
-    imageUrl: 'https://picsum.photos/seed/Monitor/400',
+    imageUrl: 'https://picsum.photos/seed/Monitor/400'
   },
 ];
 
