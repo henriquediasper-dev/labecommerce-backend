@@ -1,5 +1,7 @@
 import { TUsers } from "./types";
 import { TProduct } from "./types";
+import express, { Request, Response } from "express";
+import cors from 'cors'
 
 // Array de usuários
 export const users: TUsers[] = [
@@ -8,14 +10,14 @@ export const users: TUsers[] = [
     name: 'Fulano',
     email: 'fulano@email.com',
     password: 'fulano123',
-    createdAt: new Date().toISOString(),
+    createdAt: new Date().toISOString()
   },
   {
     id: 'u002',
     name: 'Beltrana',
     email: 'beltrana@email.com',
     password: 'beltrana00',
-    createdAt: new Date().toISOString(),
+    createdAt: new Date().toISOString()
   },
 ];
 
@@ -103,3 +105,57 @@ export function searchProductsByName (name: string): TProduct[] {
   // Retornamos os resultados da busca
   return searchResults;
 }
+
+const app = express()
+
+app.use(express.json())
+app.use(cors())
+
+app.listen(3003, () => {
+  console.log("Servidor rodando na porta 3003")
+})
+
+// app.get("/ping", (req: Request, res: Response) => {
+//   res.send("Pong!")
+// })
+
+app.get("/users", (req: Request, res: Response) => {
+  res.status(200).send(users)
+})
+
+app.get("/products", (req: Request, res: Response) => {
+  const nameToFind = req.query.name as string
+
+  if (nameToFind) {
+    const result: TProduct[] = products.filter(
+      (product) => product.name.toLowerCase().includes(nameToFind.toLowerCase())
+    )
+    res.status(200).send(result)
+    
+  } else {
+    res.status(200).send(products)
+  }
+})
+
+app.post("/users", (req: Request, res: Response) => {
+  const id = req.body.id as string
+  const name = req.body.name as string
+  const email = req.body.email as string
+  const password = req.body.password as string
+
+  const result = createTUser(id, name, email, password)
+
+  res.status(201).send(result)
+})
+
+app.post("/products", (req: Request, res: Response) => {
+  const id = req.body.id as string
+  const name = req.body.name as string
+  const price = req.body.price as number
+  const description = req.body.description as string
+  const imageUrl = req.body.imageUrl as string
+
+  const result = createProduct(id, name, price, description, imageUrl);
+
+  res.status(201).send(result)
+})
