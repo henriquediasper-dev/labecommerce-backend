@@ -108,21 +108,22 @@ export function searchProductsByName (name: string): TProduct[] {
 
 const app = express()
 
+// Configuração para lidar com o formato JSON nas requisições
 app.use(express.json())
+// Configuração para lidar com o CORS (Cross-Origin Resource Sharing)
 app.use(cors())
 
+// Inicialização do servidor na porta 3003
 app.listen(3003, () => {
   console.log("Servidor rodando na porta 3003")
 })
 
-// app.get("/ping", (req: Request, res: Response) => {
-//   res.send("Pong!")
-// })
-
+// Rota para obter todos os usuários
 app.get("/users", (req: Request, res: Response) => {
   res.status(200).send(users)
 })
 
+// Rota para obter todos os produtos, com opção de filtrar por nome
 app.get("/products", (req: Request, res: Response) => {
   const nameToFind = req.query.name as string
 
@@ -137,6 +138,7 @@ app.get("/products", (req: Request, res: Response) => {
   }
 })
 
+// Rota para criar um novo usuário
 app.post("/users", (req: Request, res: Response) => {
   const id = req.body.id as string
   const name = req.body.name as string
@@ -148,6 +150,7 @@ app.post("/users", (req: Request, res: Response) => {
   res.status(201).send(result)
 })
 
+// Rota para criar um novo produto
 app.post("/products", (req: Request, res: Response) => {
   const id = req.body.id as string
   const name = req.body.name as string
@@ -158,4 +161,53 @@ app.post("/products", (req: Request, res: Response) => {
   const result = createProduct(id, name, price, description, imageUrl);
 
   res.status(201).send(result)
+})
+
+// Rota para deletar um usuário específico
+app.delete("/users/:id", (req: Request, res: Response) => {
+  const idToDelete = req.params.id
+
+  const userIndex = users.findIndex((user) => user.id === idToDelete)
+
+  if (userIndex >= 0) {
+    users.splice(userIndex, 1)
+  }
+
+  res.status(200).send("Usuário deletado com sucesso")
+})
+
+// Rota para deletar um produto específico
+app.delete("/products/:id", (req: Request, res: Response) => {
+  const idToDelete = req.params.id
+
+  const productIndex = products.findIndex((product) => product.id === idToDelete)
+
+  if (productIndex >= 0) {
+    users.splice(productIndex, 1)
+  }
+
+  res.status(200).send("Produto deletado com sucesso")
+})
+
+// Rota para editar um produto específico
+app.put("/products/:id", (req: Request, res: Response) => {
+  const idToEdit = req.params.id
+
+  const newId = req.body.id as string | undefined
+  const newName = req.body.name as string | undefined
+  const newPrice = req.body.price as number | undefined
+  const newDescription = req.body.description as string | undefined
+  const newImageUrl = req.body.imageUrl as string | undefined
+
+  const product = products.find((product) => product.id === idToEdit)
+
+  if(product) {
+    product.id = newId || product.id
+    product.name = newName || product.name
+    product.price = isNaN(Number(newPrice)) ? product.price : newPrice as number
+    product.description = newDescription || product.description
+    product.imageUrl = newImageUrl || product.imageUrl
+  }
+
+  res.status(200).send("Atualização realizada com sucesso")
 })
