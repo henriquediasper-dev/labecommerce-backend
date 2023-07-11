@@ -41,10 +41,6 @@ VALUES (
         DATETIME('now')
     );
 
--- Consulta dos registros na tabela de usuários (users)
-
-SELECT * FROM users;
-
 -- Criação da tabela de produtos (products)
 
 CREATE TABLE
@@ -92,12 +88,74 @@ VALUES (
         'https://picsum.photos/seed/Notebook/400'
     ), (
         'prod007',
-        'Headset',
+        'Headset Gamer',
         150,
         'Headset Gamer com Microfone',
         'https://picsum.photos/seed/Headset/400'
     );
 
+-- Consulta dos registros na tabela de usuários (users)
+
+SELECT * FROM users;
+
 -- Consulta dos registros na tabela de produtos (products)
 
 SELECT * FROM products;
+
+-- Busca todos os produtos que possuem o termo "gamer" em seu nome.
+
+SELECT * FROM products WHERE name LIKE '%gamer%';
+
+-- Cria uma nova pessoa na tabela users
+
+INSERT INTO
+    users (
+        id,
+        name,
+        email,
+        password,
+        created_at
+    )
+VALUES (
+        'u006',
+        'João do beck',
+        'joao@example.com',
+        'senha123',
+        DATETIME('now')
+    );
+
+-- Cria um novo produto na tabela products
+
+INSERT INTO
+    products (
+        id,
+        name,
+        price,
+        description,
+        image_url
+    )
+VALUES (
+        'prod008',
+        'Mouse Gamer',
+        75,
+        'Mouse gamer com DPI ajustável',
+        'https://example.com/mouse.jpg'
+    );
+
+-- delete user por id
+
+DELETE FROM users WHERE id = 'u001';
+
+-- delete product por id
+
+DELETE FROM products WHERE id = 'prod001';
+
+-- edição de produto por id, neste caso a query edita todas as colunas do item
+
+UPDATE products
+SET
+    name = 'Fone Gamer',
+    price = 89.99,
+    description = 'Fone de alta qualidade sonora',
+    image_url = 'https://example.com/fone-de-ouvido.jpg'
+WHERE id = 'prod008';
