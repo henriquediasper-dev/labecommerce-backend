@@ -159,3 +159,91 @@ SET
     description = 'Fone de alta qualidade sonora',
     image_url = 'https://example.com/fone-de-ouvido.jpg'
 WHERE id = 'prod008';
+
+-- Cria a tabela de pedidos
+
+CREATE TABLE
+    purchases (
+        id TEXT PRIMARY KEY UNIQUE NOT NULL,
+        buyer TEXT NOT NULL,
+        total_price REAL NOT NULL,
+        created_at TEXT NOT NULL,
+        FOREIGN KEY (buyer) REFERENCES users(id)
+    );
+
+-- criando pedidos para cada pessoa cadastrada
+
+-- pedidos para Henrique Dias
+
+INSERT INTO
+    purchases (
+        id,
+        buyer,
+        total_price,
+        created_at
+    )
+VALUES (
+        'pur001',
+        'u003',
+        420.00,
+        '2023-07-12 10:30:00'
+    );
+
+-- pedidos para Crislayne Maria
+
+INSERT INTO
+    purchases (
+        id,
+        buyer,
+        total_price,
+        created_at
+    )
+VALUES (
+        'pur002',
+        'u004',
+        760.00,
+        '2023-07-12 11:50:00'
+    );
+
+-- pedidos para Maria Leonor
+
+INSERT INTO
+    purchases (
+        id,
+        buyer,
+        total_price,
+        created_at
+    )
+VALUES (
+        'pur003',
+        'u005',
+        290.00,
+        '2023-07-12 13:20:00'
+    );
+
+-- Alteração do preço total do pedido
+
+-- diminuindo o preço total do pedido com id 'p001'
+
+UPDATE purchases
+SET
+    total_price = total_price - 100.00
+WHERE id = 'pur001';
+
+-- aumentando o preço total do pedido com  o id 'p002'
+
+UPDATE purchases
+SET
+    total_price = total_price + 220.00
+WHERE id = 'pur002';
+
+SELECT
+    purchases.id AS purchase_id,
+    users.id AS buyer_id,
+    users.name AS buyer_name,
+    users.email AS buyer_email,
+    purchases.total_price AS total_price,
+    purchases.created_at AS created_at
+FROM purchases
+    JOIN users ON purchases.buyer = users.id
+WHERE purchases.id = 'pur001';
