@@ -168,8 +168,10 @@ CREATE TABLE
         buyer TEXT NOT NULL,
         total_price REAL NOT NULL,
         created_at TEXT NOT NULL,
-        FOREIGN KEY (buyer) REFERENCES users(id)
+        FOREIGN KEY (buyer) REFERENCES users(id) ON UPDATE CASCADE ON DELETE CASCADE
     );
+
+DROP TABLE purchases;
 
 -- criando pedidos para cada pessoa cadastrada
 
@@ -237,6 +239,8 @@ SET
     total_price = total_price + 220.00
 WHERE id = 'pur002';
 
+-- Seleciona os campos que serão retornados na consulta
+
 SELECT
     purchases.id AS purchase_id,
     users.id AS buyer_id,
@@ -247,3 +251,79 @@ SELECT
 FROM purchases
     JOIN users ON purchases.buyer = users.id
 WHERE purchases.id = 'pur001';
+
+-- Criação da tabela de relações entre produtos e pedidos (purchases_products)
+
+CREATE TABLE
+    purchases_products (
+        purchase_id TEXT NOT NULL,
+        product_id TEXT NOT NULL,
+        quantity INTEGER NOT NULL,
+        FOREIGN KEY (purchase_id) REFERENCES purchases(id) ON UPDATE CASCADE ON DELETE CASCADE,
+        FOREIGN KEY (product_id) REFERENCES products(id) ON UPDATE CASCADE ON DELETE CASCADE
+    );
+
+DROP TABLE purchase_products;
+
+-- inserção de dados na tabela purchase_products
+
+-- Compra 1: Pedido 'pur001' com os produtos 'prod003' (qt 2) e 'prod005' (qnt 1)
+
+INSERT INTO
+    purchases_products (
+        purchase_id,
+        product_id,
+        quantity
+    )
+VALUES ('pur001', 'prod003', 2), ('pur001', 'prod005', 1);
+
+-- Compra 2: Pedido 'pur002' com os produtos 'prod004' (qt 3) e 'prod006' (qt 1)
+
+INSERT INTO
+    purchases_products (
+        purchase_id,
+        product_id,
+        quantity
+    )
+VALUES ('pur002', 'prod004', 3), ('pur002', 'prod006', 1);
+
+-- Compra 3: Pedido 'pur003' com o produto 'prod005' (qt 4)
+
+INSERT INTO
+    purchases_products (
+        purchase_id,
+        product_id,
+        quantity
+    )
+VALUES ('pur003', 'prod005', 4);
+
+-- Consulta com INNER JOIN retornando todas as colunas das tabelas relacionadas (purchases_products, purchases e products)
+
+-- SELECT *
+
+-- FROM purchases_products
+
+--     INNER JOIN purchases ON purchases_products.purchase_id = purchases.id
+
+--     INNER JOIN products ON purchases_products.product_id = products.id
+
+-- WHERE
+
+--     purchases.id = purchases_products.purchase_id;
+
+SELECT
+    purchases_products.purchase_id,
+    purchases_products.product_id,
+    purchases_products.quantity,
+    purchases.id AS purchase_id,
+    purchases.buyer AS buyer_id,
+    purchases.total_price,
+    purchases.created_at AS purchase_created_at,
+    products.id AS product_id,
+    products.name AS product_name,
+    products.price AS product_price,
+    products.description AS product_description,
+    products.image_url AS product_image_url
+FROM purchases_products
+    INNER JOIN purchases ON purchases_products.purchase_id = purchases.id
+    INNER JOIN products ON purchases_products.product_id = products.id;
