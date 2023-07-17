@@ -10,6 +10,7 @@ import {
 import express, { Request, Response } from "express";
 import cors from "cors";
 import { TProduct } from "./types";
+import { db } from "./database/knex";
 
 // // Criando um novo usuário
 // createTUser(
@@ -50,9 +51,10 @@ app.listen(3003, () => {
 });
 
 // Rota para obter todos os usuários
-app.get("/users", (req: Request, res: Response) => {
+app.get("/users", async (req: Request, res: Response) => {
   try {
-    res.status(200).send(users);
+    const result = await db.raw(`SELECT * FROM users;`);
+    res.status(200).send(result);
   } catch (error: any) {
     console.log(error);
 
@@ -64,7 +66,7 @@ app.get("/users", (req: Request, res: Response) => {
 });
 
 // Rota para obter todos os produtos, com opção de filtrar por nome
-app.get("/products", (req: Request, res: Response) => {
+app.get("/products", async (req: Request, res: Response) => {
   try {
     // Obtém o query param "name" da requisição
     const nameToFind = req.query.name as string;
@@ -72,8 +74,8 @@ app.get("/products", (req: Request, res: Response) => {
     // Verifica se o query param "name" existe e possui pelo menos um caractere
     if (typeof nameToFind === "string" && nameToFind.length > 0) {
       // Filtra os produtos com base no nome fornecido
-      const result: TProduct[] = products.filter((product) =>
-        product.name.toLowerCase().includes(nameToFind.toLowerCase())
+      const result: TProduct[] = await db.raw(
+        `SELECT * FROM products WHERE name LIKE '%${nameToFind}%';`
       );
 
       // Verifica se houve algum produto encontrado
@@ -86,6 +88,7 @@ app.get("/products", (req: Request, res: Response) => {
       res.status(200).send(result);
     } else {
       // Caso o query params não tenha sido fornecido ou não possua caracteres, retorna todos os produtos
+      const products: TProduct[] = await db.raw(`SELECT * FROM products`);
       res.status(200).send(products);
     }
   } catch (error: any) {
@@ -105,7 +108,7 @@ app.get("/products", (req: Request, res: Response) => {
 });
 
 // Rota para criar um novo usuário
-app.post("/users", (req: Request, res: Response) => {
+app.post("/users", async (req: Request, res: Response) => {
   try {
     // Verifica se todas as propriedades esperadas existem no corpo da requisição
     if (
@@ -124,21 +127,28 @@ app.post("/users", (req: Request, res: Response) => {
     const password = req.body.password as string;
 
     // Verifica se já existe uma conta com o mesmo ID
-    const existingUserWithId = users.find((user) => user.id === id);
+    const [existingUserWithId] = await db.raw(
+      `SELECT * FROM users WHERE id = '${id}' LIMIT 1`
+    );
     if (existingUserWithId) {
       throw new Error("Já existe uma conta com o mesmo ID");
     }
 
     // Verifica se já existe uma conta com o mesmo e-mail
-    const existingUserWithEmail = users.find((user) => user.email === email);
+    const [existingUserWithEmail] = await db.raw(
+      `SELECT * FROM users WHERE email = '${email}' LIMIT 1`
+    );
     if (existingUserWithEmail) {
       throw new Error("Já existe uma conta com o mesmo e-mail");
     }
 
     // Cria um novo usuário
-    const result = createTUser(id, name, email, password);
 
-    res.status(201).send(result);
+    await db.raw(
+      `INSERT INTO users (id, name, email, password, created_at) VALUES ('${id}', '${name}', '${email}', '${password}', '${new Date().toISOString()}')`
+    );
+
+    res.status(201).send("Usuário criado com sucesso");
   } catch (error: any) {
     console.log(error);
 
@@ -153,15 +163,15 @@ app.post("/users", (req: Request, res: Response) => {
 });
 
 // Rota para criar um novo produto
-app.post("/products", (req: Request, res: Response) => {
+app.post("/products", async (req: Request, res: Response) => {
   try {
     // Verifica se todas as propriedades esperadas existem no corpo da requisição
     if (
-      typeof !req.body.id !== "string" ||
-      typeof !req.body.name !== "string" ||
-      typeof !req.body.price !== "string" ||
-      typeof !req.body.description !== "string" ||
-      typeof !req.body.imageUrl !== "string"
+      typeof req.body.id !== "string" ||
+      typeof req.body.name !== "string" ||
+      typeof req.body.price !== "string" ||
+      typeof req.body.description !== "string" ||
+      typeof req.body.imageUrl !== "string"
     ) {
       throw new Error("Dados incompletos do produto");
     }
@@ -174,15 +184,20 @@ app.post("/products", (req: Request, res: Response) => {
     const imageUrl = req.body.imageUrl as string;
 
     // Verifica se já existe um produto com a mesma id
-    const existingProduct = products.find((product) => product.id === id);
+    const [existingProduct] = await db.raw(
+      `SELECT * FROM products WHERE id = '${id}' LIMIT 1`
+    );
     if (existingProduct) {
       throw new Error("Já existe um produto com a mesma id");
     }
 
     // Cria um novo produto
-    const result = createProduct(id, name, price, description, imageUrl);
 
-    res.status(201).send(result);
+    await db.raw(
+      `INSERT INTO products (id, name, price, description, image_url) VALUES ('${id}', '${name}', '${price}', '${description}', '${imageUrl}')`
+    );
+
+    res.status(201).send("Produto cadastrado com sucesso");
   } catch (error: any) {
     console.log(error);
 
@@ -263,10 +278,11 @@ app.delete("/products/:id", (req: Request, res: Response) => {
 });
 
 // Rota para editar um produto específico
-app.put("/products/:id", (req: Request, res: Response) => {
+app.put("/products/:id", async (req: Request, res: Response) => {
   try {
-    const idToEdit = req.params.id;
+    const idToEdit = req.params.id; // Obtém o ID do produto a ser editado a partir dos parâmetros da rota
 
+    // Obtém as novas informações do produto a partir do corpo da requisição
     const newId = typeof req.body.id === "string" ? req.body.id : undefined;
     const newName =
       typeof req.body.name === "string" ? req.body.name : undefined;
@@ -280,38 +296,53 @@ app.put("/products/:id", (req: Request, res: Response) => {
       typeof req.body.imageUrl === "string" ? req.body.imageUrl : undefined;
 
     // Verifica se o produto existe antes de editá-lo
-    const product = products.find((product) => product.id === idToEdit);
+    const [existingProduct] = await db.raw(
+      `SELECT *FROM products WHERE id = '${idToEdit}' LIMIT 1`
+    );
 
-    if (!product) {
+    if (!existingProduct) {
       // Se o produto não for encontrado, lança uma excessão com a mensagem de erro
       throw new Error("Produto não econtrado");
     }
 
-    // Validando os dados opcionais do body se eles forem recebido
+    const updateFields: string[] = []; // array para armazenar as cláusulas SET da consulta de atualização
+
+    // Verifica se cada nova informação do produto foi fornecida e, se sim, adiciona a cláusula SET correspondente ao array
     if (newId !== undefined) {
       //Se o newId não for undefined, atualiza o id do produto
-      product.id = newId;
+      updateFields.push(`id = '${newId}'`);
     }
 
     if (newName !== undefined) {
       // Se newName não for undefined, atualiza nome do produto
-      product.name = newName;
+      updateFields.push(`name = '${newName}'`);
     }
 
     if (newPrice !== undefined && !isNaN(newPrice)) {
       // Se o newPrice não for undefined e não for NaN, atualiza o preço do produto
-      product.price = newPrice;
+      updateFields.push(`price = ${newPrice}`);
     }
 
     if (newDescription !== undefined) {
       // Se o newDescription não for undefined, atualiza a descrição do produto
-      product.description = newDescription;
+      updateFields.push(`description = ${newDescription}`);
     }
 
     if (newImageUrl !== undefined) {
       // Se o newImageUrl não for undefined, atualiza a URL da imagem do produto
-      product.imageUrl = newImageUrl;
+      updateFields.push(`imageUrl = ${newImageUrl}`);
     }
+
+    // Verifica se algum campo para atualizar foi fornecido
+    if (updateFields.length === 0) {
+      throw new Error("Nenhum campo para atualizar fornecido");
+    }
+
+    console.log(updateFields);
+    // Executa a consulta de atualização do produto no banco de dados usando as cláusulas SET acumuladas
+    await db.raw(
+      `UPDATE products SET ${updateFields.join(", ")} WHERE id = '${idToEdit}'`
+    );
 
     // Retorna uma resposta de sucesso
     res.status(200).send("Atualização realizada com sucesso");
@@ -325,5 +356,98 @@ app.put("/products/:id", (req: Request, res: Response) => {
 
     // Envia a mensagem de erro como resposta
     res.send(error.message);
+  }
+});
+
+// Rota para obter todos os pedidos
+app.get("/purchases", async (req: Request, res: Response) => {
+  try {
+    const result = await db.raw(`SELECT * FROM purchases;`);
+    res.status(200).send(result);
+  } catch (error: any) {
+    console.log(error);
+
+    if (res.statusCode === 200) {
+      res.status(500);
+    }
+    res.send("Erro ao obter os pedidos");
+  }
+});
+
+// Rota para criar um novo pedido
+app.post("/purchases", async (req: Request, res: Response) => {
+  try {
+    // Verifica se todas as propriedades esperadas existem no corpo da requisição
+    if (
+      typeof req.body.id !== "string" ||
+      typeof req.body.buyer !== "string" ||
+      typeof req.body.totalPrice !== "number"
+    ) {
+      throw new Error("Dados incompletos do produto");
+    }
+
+    // Extraindo as propriedades do corpo da requisição
+    const id = req.body.id as string;
+    const buyer = req.body.buyer as string;
+    const totalPrice = req.body.totalPrice as number;
+
+    // Verifica se já existe um produto com a mesma id
+    const [existingPurchase] = await db.raw(
+      `SELECT * FROM products WHERE id = '${id}' LIMIT 1`
+    );
+    if (existingPurchase) {
+      throw new Error("Já existe um pedido com a mesma id");
+    }
+
+    // Cria um novo produto
+
+    await db.raw(
+      `INSERT INTO purchases (id, buyer, total_price, created_at) VALUES ('${id}', '${buyer}', '${totalPrice}', '${new Date().toISOString()}')`
+    );
+
+    res.status(201).send("Pedido registrado com sucesso");
+  } catch (error: any) {
+    console.log(error);
+
+    // Define o status da resposta como 400 se o status atual for 200
+    if (res.statusCode === 200) {
+      res.status(400);
+    }
+
+    // Envia a mensagem de erro como resposta
+    res.send(error.message);
+  }
+});
+
+// Rota para deletar um pedido pelo seu id
+app.delete("/purchases/:id", async (req: Request, res: Response) => {
+  try {
+    const idToDelete = req.params.id;
+
+    // Verifica se a compra existe antes de excluí-la
+    const [existingPurchase] = await db.raw(
+      `SELECT * FROM purchases WHERE id = '${idToDelete}';`
+    );
+    if (!existingPurchase) {
+      res.status(404);
+      throw new Error("Compra não encontrada");
+    }
+
+    // Executa a consulta de exclusão no banco de dados
+    await db.raw(`DELETE FROM purchases WHERE id = '${idToDelete}'`);
+
+    res.status(200).send({ message: "Compra excluída com sucesso" });
+  } catch (error: any) {
+    console.log(error);
+
+    if (res.statusCode === 200) {
+      res.status(500);
+    }
+
+    if (error instanceof Error) {
+      res.send(error.message);
+    } else {
+      res.send("Erro inesperado");
+    }
   }
 });
