@@ -1,42 +1,7 @@
-import {
-  users,
-  products,
-  createTUser,
-  getAllUsers,
-  createProduct,
-  getAllProducts,
-  searchProductsByName,
-} from "./database";
 import express, { Request, Response } from "express";
 import cors from "cors";
 import { TProduct } from "./types";
 import { db } from "./database/knex";
-
-// // Criando um novo usuário
-// createTUser(
-//   'u003',
-//   'Ciclana',
-//   'ciclana@email.com',
-//   'ciclana00'
-// );
-
-// // Buscando todos os usuários
-// const allUsers = getAllUsers();
-
-// // Criando um novo produto
-// const createProductResult = createProduct(
-//     "prod003",
-//     "SSD gamer",
-//     349.99,
-//     "Acelere seu sistema com velocidades incríveis de leitura e gravação.",
-//     "https://example.com/ssd-gamer.jpg"
-//   );
-
-// // Buscando todos os produtos
-// const allProducts = getAllProducts();
-
-// const searchResults = searchProductsByName("gamer");
-// console.log('Resultados da busca', searchResults)
 
 const app = express();
 
@@ -196,10 +161,6 @@ app.post("/products", async (req: Request, res: Response) => {
 
     // Cria um novo produto
 
-    // await db.raw(
-    //   `INSERT INTO products (id, name, price, description, image_url) VALUES ('${id}', '${name}', '${price}', '${description}', '${imageUrl}')`
-    // );
-
     const newProduct = {
       id: id,
       name: name,
@@ -292,19 +253,6 @@ app.put("/products/:id", async (req: Request, res: Response) => {
   try {
     const idToEdit = req.params.id; // Obtém o ID do produto a ser editado a partir dos parâmetros da rota
 
-    // Obtém as novas informações do produto a partir do corpo da requisição
-    // const newId = typeof req.body.id === "string" ? req.body.id : undefined;
-    // const newName =
-    //   typeof req.body.name === "string" ? req.body.name : undefined;
-    // const newPrice =
-    //   typeof req.body.price === "number" ? req.body.price : undefined;
-    // const newDescription =
-    //   typeof req.body.description === "string"
-    //     ? req.body.description
-    //     : undefined;
-    // const newImageUrl =
-    //   typeof req.body.imageUrl === "string" ? req.body.imageUrl : undefined;
-
     const { id, name, price, description, imageUrl } = req.body; // Obtém as novas informações do produto a partir do corpo da requisição
 
     // Verifica se o produto existe antes de editá-lo
@@ -383,78 +331,41 @@ app.get("/purchases", async (req: Request, res: Response) => {
 });
 
 // Rota para criar um novo pedido
-// app.post("/purchases", async (req: Request, res: Response) => {
-//   try {
-//     // Verifica se todas as propriedades esperadas existem no corpo da requisição
-//     if (
-//       typeof req.body.id !== "string" ||
-//       typeof req.body.buyer !== "string" ||
-//       typeof req.body.totalPrice !== "number"
-//     ) {
-//       throw new Error("Dados incompletos do produto");
-//     }
-
-//     // Extraindo as propriedades do corpo da requisição
-//     const id = req.body.id as string;
-//     const buyer = req.body.buyer as string;
-//     const totalPrice = req.body.totalPrice as number;
-
-//     // Verifica se já existe um produto com a mesma id
-//     const [existingPurchase] = await db.raw(
-//       `SELECT * FROM products WHERE id = '${id}' LIMIT 1`
-//     );
-//     if (existingPurchase) {
-//       throw new Error("Já existe um pedido com a mesma id");
-//     }
-
-//     // Cria um novo produto
-
-//     await db.raw(
-//       `INSERT INTO purchases (id, buyer, total_price, created_at) VALUES ('${id}', '${buyer}', '${totalPrice}', '${new Date().toISOString()}')`
-//     );
-
-//     res.status(201).send("Pedido registrado com sucesso");
-//   } catch (error: any) {
-//     console.log(error);
-
-//     // Define o status da resposta como 400 se o status atual for 200
-//     if (res.statusCode === 200) {
-//       res.status(400);
-//     }
-
-//     // Envia a mensagem de erro como resposta
-//     res.send(error.message);
-//   }
-// });
-
-// Rota para criar um novo pedido
 app.post("/purchases", async (req: Request, res: Response) => {
   try {
+    // Extrai os dados recebidos na requisição
     const id = req.body.id;
     const buyer = req.body.buyer;
     const products = req.body.products;
 
+    // Verifica se o 'id' é uma string, se não for, retorna um erro 400
     if (typeof id !== "string") {
       res.status(400);
       throw new Error("'id' precisa ser uma string");
     }
+    // Verifica se o 'buyer' é uma string, se não for, retorna um erro 400
     if (typeof buyer !== "string") {
       res.status(400);
       throw new Error("'buyer' precisa ser uma string");
     }
 
+    // Verifica se já existe um pedido com o mesmo 'id', se sim, retorna um erro 400
     const [purchase] = await db("purchases").where({ id });
 
     if (purchase) {
       res.status(400);
-      throw new Error("purchase já existe");
+      throw new Error("Pedido já existe");
     }
 
+    // Inicializa um array vazio para guardar os produtos do pedido
     const resultProducts = [];
 
+    // Inicializa o valor total do pedido como 0
     let totalPrice = 0;
 
+    // Percorre a lista de produtos do pedido
     for (let prod of products) {
+      // Busca o produto no banco de dados usando o 'id' do produto
       const [product] = await db("products").where({ id: prod.id });
 
       if (!product) {
@@ -462,21 +373,27 @@ app.post("/purchases", async (req: Request, res: Response) => {
         throw new Error(`${prod.id} não encontrado`);
       }
 
+      // Adiciona o produto à lista de produtos do pedido, incluindo a quantidade desejada
       resultProducts.push({ ...product, quantity: prod.quantity });
     }
 
+    // Calcula o preço total do pedido somando o preço de cada produto multiplicado pela quantidade
     for (let product of resultProducts) {
       totalPrice += product.price * product.quantity;
     }
 
+    // Cria um novo objeto com os dados do pedido
     const newPurchase = {
       id,
       buyer,
       total_price: totalPrice,
       created_at: new Date().toISOString(),
     };
+    // Insere o novo pedido no banco de dados
     await db("purchases").insert(newPurchase);
 
+    // Para cada produto do pedido, cria um novo objeto com os dados do relacionamento
+    // entre o pedido e o produto, e insere no banco de dados na tabela "purchases_products"
     for (let product of products) {
       const newPurchaseProducts = {
         purchase_id: id,
@@ -487,6 +404,7 @@ app.post("/purchases", async (req: Request, res: Response) => {
       await db("purchases_products").insert(newPurchaseProducts);
     }
 
+    // Se tudo ocorrer bem, envia uma resposta com o status 201 (Criado) e uma mensagem de sucesso
     res.status(201).send("Pedido realizado com sucesso");
   } catch (error: any) {
     console.log(error);

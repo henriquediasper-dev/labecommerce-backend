@@ -299,18 +299,6 @@ VALUES ('pur003', 'prod005', 4);
 
 -- Consulta com INNER JOIN retornando todas as colunas das tabelas relacionadas (purchases_products, purchases e products)
 
--- SELECT *
-
--- FROM purchases_products
-
---     INNER JOIN purchases ON purchases_products.purchase_id = purchases.id
-
---     INNER JOIN products ON purchases_products.product_id = products.id
-
--- WHERE
-
---     purchases.id = purchases_products.purchase_id;
-
 SELECT
     purchases_products.purchase_id,
     purchases_products.product_id,
