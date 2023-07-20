@@ -33,7 +33,7 @@ Exemplo de configuração do banco de dados no arquivo knex.ts:
 import { knex } from "knex";
 
 export const db = knex({
-  client: "sqlite3", // Cliente do banco de dados (SQLite3)
+  client: "sqlite3", 
   connection: {
     filename: "./src/database/labecommerce.db",
   },
