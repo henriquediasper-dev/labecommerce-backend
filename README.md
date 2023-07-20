@@ -14,16 +14,7 @@ comando: cd nome-do-repositorio
 
 comando: npm install
 
-### 1.3 Configure o banco de dados:
-
-Antes de executar o projeto, é essencial configurar corretamente o banco de dados para garantir que as operações de armazenamento e recuperação de dados funcionem corretamente. Neste projeto, utilizamos o Knex.js, que é um construtor de consultas SQL para Node.js, para realizar as operações de banco de dados.
-
-Siga os passos abaixo para configurar o banco de dados:
-
-
-Claro! Com base no arquivo knex.ts fornecido, podemos detalhar a seção de configuração do banco de dados no README da seguinte maneira:
-
-1.3 Configurar o banco de dados:
+### 1.3 Configurar o banco de dados:
 
 Antes de executar o projeto, é essencial configurar corretamente o banco de dados para garantir que as operações de armazenamento e recuperação de dados funcionem corretamente. Neste projeto, utilizamos o Knex.js, que é um construtor de consultas SQL para Node.js, para realizar as operações de banco de dados.
 
