@@ -16,7 +16,52 @@ comando: npm install
 
 ### 1.3 Configure o banco de dados:
 
-Certifique-se de configurar corretamente o banco de dados, pois o projeto usa o Knex.js para realizar as operações de banco de dados. Você pode configurar as credenciais de conexão no arquivo database/knex.js.
+Antes de executar o projeto, é essencial configurar corretamente o banco de dados para garantir que as operações de armazenamento e recuperação de dados funcionem corretamente. Neste projeto, utilizamos o Knex.js, que é um construtor de consultas SQL para Node.js, para realizar as operações de banco de dados.
+
+Siga os passos abaixo para configurar o banco de dados:
+
+
+Claro! Com base no arquivo knex.ts fornecido, podemos detalhar a seção de configuração do banco de dados no README da seguinte maneira:
+
+1.3 Configurar o banco de dados:
+
+Antes de executar o projeto, é essencial configurar corretamente o banco de dados para garantir que as operações de armazenamento e recuperação de dados funcionem corretamente. Neste projeto, utilizamos o Knex.js, que é um construtor de consultas SQL para Node.js, para realizar as operações de banco de dados.
+
+Siga os passos abaixo para configurar o banco de dados:
+
+1.3.1 Certifique-se de ter o SQLite instalado em sua máquina ou ambiente de desenvolvimento. O SQLite é o banco de dados que utilizaremos neste projeto.
+
+1.3.2 Com o banco de dados instalado, o próximo passo é criar um arquivo de banco de dados SQLite. No projeto, o arquivo labecommerce.db será criado automaticamente na pasta src/database, conforme configurado no arquivo knex.ts.
+
+1.3.3 No arquivo knex.ts, você encontrará as configurações de conexão do Knex.js para o SQLite. Essas configurações incluem o caminho para o arquivo do banco de dados e algumas opções específicas.
+
+Exemplo de configuração do banco de dados no arquivo knex.ts: 
+
+// src/database/knex.ts
+
+import { knex } from "knex";
+
+export const db = knex({
+  client: "sqlite3", // Cliente do banco de dados (SQLite3)
+  connection: {
+    filename: "./src/database/labecommerce.db",
+  },
+  useNullAsDefault: true, 
+  pool: {
+    min: 0, 
+    max: 1, 
+    afterCreate: (conn: any, cb: any) => {
+      conn.run("PRAGMA foreign_keys = ON", cb);
+    }, 
+  },
+});
+
+
+Com as configurações do banco de dados devidamente definidas, o projeto estará pronto para se conectar ao SQLite e realizar as operações de CRUD (Create, Read, Update, Delete) necessárias para os usuários, produtos e pedidos.
+
+Certifique-se de seguir corretamente essas etapas antes de iniciar o servidor. Isso garantirá que todas as interações com o banco de dados sejam executadas corretamente e que o servidor funcione sem problemas.
+
+Observação: O Knex.js suporta vários outros bancos de dados, além do SQLite. Se você optar por usar um banco de dados diferente, certifique-se de verificar as configurações específicas do cliente para o banco de dados que está utilizando.
 
 ## 2. Executando o servidor
 
