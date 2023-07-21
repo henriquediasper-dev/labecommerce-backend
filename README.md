@@ -5,14 +5,16 @@ Essa é uma API desenvolvida usando o framework Express.js para gerenciar usuár
 ## 1. Instalação
 
 ### 1.1 Clone o repositório:
+Execute os seguintes comandos no Git Bash:
 
-comando: git clone https://github.com/seu-usuario/nome-do-repositorio.git
+git clone https://github.com/seu-usuario/nome-do-repositorio.git
 
-comando: cd nome-do-repositorio
+cd nome-do-repositorio
 
 ### 1.2 Instale as dependências:
+Execute o seguinte comando no Git Bash:
 
-comando: npm install
+npm install
 
 ### 1.3 Configurar o banco de dados:
 
@@ -22,7 +24,7 @@ Siga os passos abaixo para configurar o banco de dados:
 
 1.3.1 Certifique-se de ter o SQLite instalado em sua máquina ou ambiente de desenvolvimento. O SQLite é o banco de dados que utilizaremos neste projeto.  Para instalá-lo, abra o Git Bash e execute o seguinte comando:
 
-comando: npm install sqlite3
+npm install sqlite3
 
 1.3.2 Com o banco de dados instalado, o próximo passo é criar um arquivo de banco de dados SQLite. No projeto, o arquivo labecommerce.db será criado automaticamente na pasta src/database, conforme configurado no arquivo knex.ts.
 
@@ -51,7 +53,7 @@ export const db = knex({
 
 1.3.4 Além disso, é necessário instalar o Knex.js globalmente em sua máquina para que ele possa ser usado no projeto. Para fazer isso, execute o seguinte comando no Git Bash:
 
-Comando: npm install -g knex
+npm install -g knex
 
 Com as configurações do banco de dados devidamente definidas, o projeto estará pronto para se conectar ao SQLite e realizar as operações de CRUD (Create, Read, Update, Delete) necessárias para os usuários, produtos e pedidos.
 
@@ -61,9 +63,9 @@ Observação: O Knex.js suporta vários outros bancos de dados, além do SQLite.
 
 ## 2. Executando o servidor
 
-### 2.1 Para iniciar o servidor, utilize o seguinte comando:
+### 2.1 Para iniciar o servidor, utilize o seguinte comando no Git Bash:
 
-comando: npm run dev
+npm run dev
 
 obs: O servidor estará disponível em http://localhost:3003.
 
