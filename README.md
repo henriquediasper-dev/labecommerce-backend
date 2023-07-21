@@ -20,7 +20,9 @@ Antes de executar o projeto, é essencial configurar corretamente o banco de dad
 
 Siga os passos abaixo para configurar o banco de dados:
 
-1.3.1 Certifique-se de ter o SQLite instalado em sua máquina ou ambiente de desenvolvimento. O SQLite é o banco de dados que utilizaremos neste projeto.
+1.3.1 Certifique-se de ter o SQLite instalado em sua máquina ou ambiente de desenvolvimento. O SQLite é o banco de dados que utilizaremos neste projeto.  Para instalá-lo, abra o Git Bash e execute o seguinte comando:
+
+comando: npm install sqlite3
 
 1.3.2 Com o banco de dados instalado, o próximo passo é criar um arquivo de banco de dados SQLite. No projeto, o arquivo labecommerce.db será criado automaticamente na pasta src/database, conforme configurado no arquivo knex.ts.
 
@@ -47,6 +49,9 @@ export const db = knex({
   },
 });
 
+1.3.4 Além disso, é necessário instalar o Knex.js globalmente em sua máquina para que ele possa ser usado no projeto. Para fazer isso, execute o seguinte comando no Git Bash:
+
+Comando: npm install -g knex
 
 Com as configurações do banco de dados devidamente definidas, o projeto estará pronto para se conectar ao SQLite e realizar as operações de CRUD (Create, Read, Update, Delete) necessárias para os usuários, produtos e pedidos.
 
@@ -58,7 +63,7 @@ Observação: O Knex.js suporta vários outros bancos de dados, além do SQLite.
 
 ### 2.1 Para iniciar o servidor, utilize o seguinte comando:
 
-comando: npm start
+comando: npm run dev
 
 obs: O servidor estará disponível em http://localhost:3003.
 
